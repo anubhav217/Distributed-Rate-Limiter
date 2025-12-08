@@ -1,9 +1,9 @@
-// src/server/app.ts
 import express from 'express';
 import Redis from 'ioredis';
-
+import { metricsRouter } from "../routes/metrics";
 import { MemoryStore } from '../lib/memoryStore';
 import { RedisStore } from '../lib/redisStore';
+import { redisClient } from "../redisClient";
 import { DefaultRateLimiter } from '../lib/rateLimiter';
 import { createRateLimiterMiddleware } from '../middleware/rateLimiterMiddleware';
 import type { RateLimitStore } from '../lib/store';
@@ -45,6 +45,10 @@ const rateLimiterMiddleware = createRateLimiterMiddleware(rateLimiter);
 
 app.use(rateLimiterMiddleware);
 
+// ------------------ NEW: Metrics endpoint ------------------
+app.use("/metrics", metricsRouter);
+// -----------------------------------------------------------
+
 app.get('/', (_req, res) => {
   res.send('Rate Limiter is running. Try /health, /login, or /api/data');
 });
@@ -61,7 +65,6 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Only listen when run directly (not when imported in tests)
 if (require.main === module) {
   app.listen(port, () => {
     console.log(`Rate-limited API listening on http://localhost:${port}`);
