@@ -1,40 +1,35 @@
-# 🚦 Distributed Rate Limiter (v1.B)
+# 🚦 Distributed Rate Limiter
 
-A clean, production-style **rate limiting system** built with **Node.js, Express, and TypeScript**.  
+<p align="center">
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+  [![Node.js Version](https://img.shields.io/badge/Node.js-18%2B-green.svg?style=for-the-badge)](#)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-4.x-blue.svg?style=for-the-badge)](#)
+  [![Issues](https://img.shields.io/github/issues/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge)](https://github.com/anubhav217/Distributed-Rate-Limiter/issues)
+  [![Forks](https://img.shields.io/github/forks/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge)](https://github.com/anubhav217/Distributed-Rate-Limiter/network/members)
+  [![Stars](https://img.shields.io/github/stars/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge)](https://github.com/anubhav217/Distributed-Rate-Limiter/stargazers)
+</p>
 
-Implements **fixed-window** and **token-bucket** algorithms with a pluggable store design, currently featuring an **in-memory store** (v1). Future releases will introduce Redis for distributed multi-instance scaling.
+An extensible rate-limiting engine for Node.js/Express — supporting fixed-window & token-bucket algorithms, pluggable store backends (in-memory or Redis), and tiered API-key based rate limiting (Free / Pro / Enterprise).
 
---- 
+---
 
-## ✨ Why this project exists
+## 🧩 What It Does & Why
 
-This project demonstrates:
+- Provide rate limiting middleware for Express APIs
+- Support both **fixed-window** and **token-bucket** algorithms based on route configuration
+- Enable **distributed rate limiting** via a pluggable store (in-memory for quick dev, Redis for production)
+- Support **tiered API-key plans**: different plans (Free / Pro / Enterprise) can have different limits
+- Easily configurable, extendable, and deployable (via Docker)
 
-- Practical implementation of real-world rate limiting algorithms  
+---
 
-- Clean separation of concerns:
+## 🏗️ Architecture Overview
 
-  - core algorithm logic  
-
-  - persistence layer  
-
-  - HTTP integration  
-
-- Readable TypeScript abstractions using interfaces & composition  
-
-- A portfolio-level example of Express middleware design  
-
---- 
-
-## 🧱 Architecture
-
-```mermaid
-flowchart LR
-  C[Client] -->|HTTP| E[Express App]
-  E --> M[Rate Limiter Middleware]
-  M --> RL[RateLimiter Core]
-  RL --> S[(RateLimitStore)]
-  S --> MEM[MemoryStore]
+```
+Client  →  Express server + middleware  →  RateLimiter core  →  RateLimitStore  
+                                                  ↑                (in-memory or Redis)  
+                                                  |
+                                           Configuration layer  
 ```
 
 ### Component responsibilities
@@ -47,85 +42,106 @@ flowchart LR
 | RateLimiter Core | Implements fixed-window & token-bucket logic |
 | RateLimitStore | Abstract persistence interface |
 | MemoryStore | In-memory implementation of RateLimitStore |
+| RedisStore | Redis-based distributed store implementation |
 
 ## 📂 Project Structure
 
 ```
-rate-limiter/
+Distributed-Rate-Limiter/
 ├─ src/
-│  ├─ config/                     # rate-limit rules based on route/key
-│  │  └─ rateLimits.ts
-│  ├─ lib/                        # core algorithm & storage abstractions
-│  │  ├─ types.ts
-│  │  ├─ store.ts
-│  │  ├─ memoryStore.ts
-│  │  └─ rateLimiter.ts
-│  ├─ middleware/                 # Express middleware wrapper
-│  │  └─ rateLimiterMiddleware.ts
-│  └─ server/                     # Express app setup
-│     └─ app.ts
+│   ├─ lib/               # core rate-limiter + store abstractions
+│   │  ├─ types.ts        # TypeScript type definitions
+│   │  ├─ store.ts        # RateLimitStore interface
+│   │  ├─ memoryStore.ts  # In-memory store implementation
+│   │  ├─ redisStore.ts   # Redis store implementation
+│   │  └─ rateLimiter.ts  # Core rate limiting algorithms
+│   ├─ config/            # API key & route-plan configs
+│   │  ├─ apiPlans.ts     # API key plans (Free/Pro/Enterprise) & route rules
+│   │  ├─ env.ts          # Environment configuration
+│   │  └─ rateLimits.ts   # Rate limit rule resolution logic
+│   ├─ middleware/        # Express middleware
+│   │  └─ rateLimiterMiddleware.ts
+│   └─ server/            # Express app entry-point
+│      └─ app.ts
+├─ tests/                 # Test files
+│  ├─ rateLimiter.unit.test.ts
+│  └─ middleware.integration.test.ts
 ├─ package.json
 ├─ tsconfig.json
+├─ jest.config.ts
+├─ Dockerfile.dev
+├─ docker-compose.yml
 ├─ README.md
 └─ LICENSE
 ```
 
-## 🛠 Tech stack
+## 🛠 Tech Stack
 
-- Node.js (TypeScript)
+- Node.js + TypeScript
 - Express
-- ts-node-dev (development)
-- (Planned) Redis for distributed store
+- Redis (ioredis)
+- Jest + ts-jest
+- Docker & Docker Compose
 
-## 🚀 Getting started
-
-### 1. Clone
-
-```bash
-git clone https://github.com/anubhav217/distributed-rate-limiter.git
-cd distributed-rate-limiter
-```
-
-### 2. Install dependencies
+## 🚀 Getting Started
 
 ```bash
+git clone https://github.com/anubhav217/Distributed-Rate-Limiter.git
+cd Distributed-Rate-Limiter
 npm install
+npm run dev        # starts API server on http://localhost:3000
 ```
 
-### 3. Run (dev)
+If using Docker (dev mode):
 
 ```bash
-npm run dev
+docker compose up
 ```
 
-You should see:
+## 🧪 Usage Examples
+
+### ✅ Free plan (default if no key provided)
+
+```bash
+# Linux / WSL / macOS (curl)
+curl -i http://localhost:3000/api/data
+
+# Windows PowerShell (iwr)
+iwr http://localhost:3000/api/data -Verbose
+```
+
+### 🔑 Pro plan
+
+```bash
+curl -i -H "x-api-key: PRO-DEMO-KEY" http://localhost:3000/api/data
+```
+
+### 🚀 Enterprise plan
+
+```bash
+curl -i -H "x-api-key: ENTERPRISE-DEMO-KEY" http://localhost:3000/api/data
+```
+
+### ✅ Example response headers
 
 ```
-Rate-limited API listening on http://localhost:3000
+HTTP/1.1 200 OK
+X-RateLimit-Plan: pro
+X-RateLimit-Limit: 600
+X-RateLimit-Remaining: 599
+X-RateLimit-Reset: 1765222844542
+Content-Type: application/json
+...
 ```
 
 ## 🌐 Endpoints & example limits
 
-| Method | Path | Description | Example limit (v1) |
+| Method | Path | Description | Example limits (varies by plan) |
 |--------|------|-------------|-------------------|
 | GET | `/` | Welcome message | — |
 | GET | `/health` | Health check | — |
-| GET | `/login` | Example login endpoint | Fixed window — 5 req/min |
-| GET | `/api/data` | Example data endpoint | Token bucket — 100 req/min |
-
-## 🔬 Testing examples
-
-### Example: /health
-
-```bash
-curl.exe -i http://localhost:3000/health
-```
-
-### Example: /api/data (token bucket)
-
-```bash
-curl.exe -i http://localhost:3000/api/data
-```
+| GET | `/login` | Example login endpoint | Fixed window — Free: 5, Pro: 10, Enterprise: 20 req/min |
+| GET | `/api/data` | Example data endpoint | Token bucket — Free: 60, Pro: 600, Enterprise: 6000 req/min |
 
 ### Exceeded limit response
 
@@ -134,74 +150,47 @@ HTTP/1.1 429 Too Many Requests
 {"error":"too_many_requests","message":"Rate limit exceeded. Please try again later."}
 ```
 
-## 🧠 How rules are resolved
+## 🔧 Configuration & How It Works
 
-Located in `src/config/rateLimits.ts`:
-
-```ts
-if (req.path.startsWith('/login')) {
-  return {
-    algorithm: 'fixed-window',
-    rule: { maxRequests: 5, windowMs: 60_000 }
-  };
-}
-
-return {
-  algorithm: 'token-bucket',
-  rule: { maxRequests: 100, windowMs: 60_000, bucketCapacity: 100 }
-};
-```
+- API keys & plans configured in `src/config/apiPlans.ts`
+- Route-based plan rules defined per route-prefix (e.g. `/login`, `/api`)
+- Rate limit algorithm and limits resolved dynamically based on plan + route (`resolveRateLimitRule()` in `src/config/rateLimits.ts`)
+- Middleware attaches rate limit headers (Limit / Remaining / Reset / Plan) and enforces limits
 
 ## 🧩 Core abstractions
 
-### RateLimitStore — `src/lib/store.ts`
+### Core Components
 
-- `incrementWindowCounter(key, windowMs)`
-- `consumeToken(key, capacity, refillRatePerSec)`
+- **RateLimitStore** (`src/lib/store.ts`) - Interface for persistence layer
+- **MemoryStore** (`src/lib/memoryStore.ts`) - In-memory implementation for development
+- **RedisStore** (`src/lib/redisStore.ts`) - Redis-based distributed store with Lua scripts
+- **DefaultRateLimiter** (`src/lib/rateLimiter.ts`) - Implements fixed-window and token-bucket algorithms
+- **Middleware** (`src/middleware/rateLimiterMiddleware.ts`) - Express middleware that extracts client key, resolves rules, and enforces limits
 
-### MemoryStore — `src/lib/memoryStore.ts`
+## 🧪 Tests
 
-Simple in-memory implementation for development / single-instance setups.
-
-### DefaultRateLimiter — `src/lib/rateLimiter.ts`
-
-Implements:
-- fixed-window logic
-- token-bucket logic
-
-### Middleware — `src/middleware/rateLimiterMiddleware.ts`
-
-Extracts client key (`x-api-key` if present, else IP)
-
-## 🧪 Tests (planned)
-
-- Jest + ts-jest
-- Unit tests
-- Edge case testing for both algorithms
-- Integration with supertest
+- Unit tests: `tests/rateLimiter.unit.test.ts` (fixed-window and token-bucket algorithms)
+- Integration tests: `tests/middleware.integration.test.ts` (Express middleware)
+- Run: `npm test` | Watch: `npm run test:watch` | Coverage: `npm run test:coverage`
 
 ## 🛣 Roadmap
 
-- [ ] Implement RedisStore for distributed rate limiting
-- [ ] Add docker-compose (API + Redis)
-- [ ] Add Jest tests (unit + integration)
-- [ ] Per-API-key / per-plan limits
-- [ ] Optional usage dashboard (React)
-- [ ] Publish core rate-limiter as an npm package
+- [x] RedisStore for distributed rate limiting
+- [x] Docker Compose setup
+- [x] Jest tests (unit + integration)
+- [x] Per-API-key / per-plan limits
+- [ ] Usage dashboard (React)
+- [ ] Publish as npm package
+- [ ] CI/CD pipeline
+- [ ] Performance benchmarking
 
-## 🧾 .gitignore
+## 🤝 Contributing
 
-```
-/node_modules
-/dist
-.env
-.DS_Store
-*.log
-```
+Pull requests are welcome! Feel free to open issues or suggest improvements.
 
 ## 📜 License
 
-MIT License — see LICENSE.
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
 
 ## 👤 Author
 
