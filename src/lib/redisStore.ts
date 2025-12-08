@@ -86,12 +86,12 @@ export class RedisStore implements RateLimitStore {
       redis.call('PEXPIRE', key, ttl_ms)
 
       local missing_tokens = capacity - tokens
+      local seconds_to_full
       if refill_rate <= 0 then
         missing_tokens = capacity
-      end
-      local seconds_to_full = missing_tokens / refill_rate
-      if refill_rate <= 0 then
         seconds_to_full = ttl_ms / 1000.0
+      else
+        seconds_to_full = missing_tokens / refill_rate
       end
       local reset_at = now_ms + (seconds_to_full * 1000.0)
 
