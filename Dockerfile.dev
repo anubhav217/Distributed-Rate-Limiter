@@ -2,8 +2,17 @@ FROM node:20-alpine
 
 WORKDIR /usr/src/app
 
-# Install dependencies ahead of time for faster dev restarts
+# Copy dependency manifests
 COPY package*.json ./
+
+# Install all dependencies (dev + prod)
 RUN npm install
 
-# Source code is mounted via volumes in docker-compose
+# Copy everything else
+COPY . .
+
+# Expose dev port
+EXPOSE 3000
+
+# Default command runs ts-node-dev for hot reload
+CMD ["npm", "run", "dev"]

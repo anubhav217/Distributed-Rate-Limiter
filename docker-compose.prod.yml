@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: distributed-rl-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: distributed-rl-api
+    environment:
+      NODE_ENV: "production"
+      STORE_BACKEND: "redis"
+      REDIS_URL: "redis://redis:6379"
+      PORT: "3000"
+    depends_on:
+      - redis
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  redis-data:

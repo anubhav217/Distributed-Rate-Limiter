@@ -1,0 +1,25 @@
+# Node
+node_modules
+npm-debug.log*
+yarn.lock
+.pnpm-store
+
+# Build output
+dist
+coverage
+
+# Env / secrets
+.env
+.env.*
+*.pem
+
+# Git / IDE / OS
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+
+# Logs
+logs
+*.log
