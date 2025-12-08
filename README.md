@@ -1,4 +1,4 @@
-# 🚦 Distributed Rate Limiter (Node.js + Express + TypeScript)
+# 🚦 Distributed Rate Limiter (v1.B)
 
 A clean, production-style **rate limiting system** built with **Node.js, Express, and TypeScript**.  
 
