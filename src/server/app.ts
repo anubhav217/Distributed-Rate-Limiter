@@ -1,12 +1,51 @@
+// src/server/app.ts
+
 import express from 'express';
+import Redis from 'ioredis';
+
 import { MemoryStore } from '../lib/memoryStore';
+import { RedisStore } from '../lib/redisStore';
 import { DefaultRateLimiter } from '../lib/rateLimiter';
 import { createRateLimiterMiddleware } from '../middleware/rateLimiterMiddleware';
+import type { RateLimitStore } from '../lib/store';
+import { config } from '../config/env';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = config.port;
 
-const store = new MemoryStore();
+let store: RateLimitStore;
+
+switch (config.storeBackend) {
+  case 'memory': {
+    console.log('[config] Using MemoryStore backend');
+    store = new MemoryStore();
+    break;
+  }
+
+  case 'redis': {
+    console.log(
+      `[config] Using RedisStore backend (REDIS_URL=${config.redisUrl})`,
+    );
+
+    const redis = new Redis(config.redisUrl);
+
+    redis.on('error', (err) => {
+      console.error('[redis] connection error:', err);
+    });
+
+    store = new RedisStore(redis);
+    break;
+  }
+
+  default: {
+    console.warn(
+      `[config] Unknown STORE_BACKEND="${config.storeBackend}", falling back to MemoryStore.`,
+    );
+    store = new MemoryStore();
+    break;
+  }
+}
+
 const rateLimiter = new DefaultRateLimiter(store);
 const rateLimiterMiddleware = createRateLimiterMiddleware(rateLimiter);
 
@@ -15,7 +54,6 @@ app.use(rateLimiterMiddleware);
 app.get('/', (_req, res) => {
   res.send('Rate Limiter is running. Try /health, /login, or /api/data');
 });
-
 
 app.get('/login', (_req, res) => {
   res.json({ message: 'Login endpoint (5 req/min fixed-window)' });

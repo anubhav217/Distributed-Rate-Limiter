@@ -1,0 +1,29 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: distributed-rl-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: distributed-rl-api
+    working_dir: /usr/src/app
+    command: sh -c "npm install && npm run dev"
+    environment:
+      STORE_BACKEND: redis
+      REDIS_URL: redis://redis:6379
+      PORT: 3000
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - redis
+    ports:
+      - "3000:3000"
+
+volumes:
+  redis-data:
