@@ -1,12 +1,18 @@
 # 🚦 Distributed Rate Limiter
 
 <p align="center">
-  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
-  [![Node.js Version](https://img.shields.io/badge/Node.js-18%2B-green.svg?style=for-the-badge)](#)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-4.x-blue.svg?style=for-the-badge)](#)
-  [![Issues](https://img.shields.io/github/issues/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge)](https://github.com/anubhav217/Distributed-Rate-Limiter/issues)
-  [![Forks](https://img.shields.io/github/forks/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge)](https://github.com/anubhav217/Distributed-Rate-Limiter/network/members)
-  [![Stars](https://img.shields.io/github/stars/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge)](https://github.com/anubhav217/Distributed-Rate-Limiter/stargazers)
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License: MIT">
+  <img src="https://img.shields.io/badge/Node.js-18%2B-green.svg?style=for-the-badge" alt="Node.js Version">
+  <img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg?style=for-the-badge" alt="TypeScript">
+  <a href="https://github.com/anubhav217/Distributed-Rate-Limiter/issues">
+    <img src="https://img.shields.io/github/issues/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge" alt="Issues">
+  </a>
+  <a href="https://github.com/anubhav217/Distributed-Rate-Limiter/network/members">
+    <img src="https://img.shields.io/github/forks/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge" alt="Forks">
+  </a>
+  <a href="https://github.com/anubhav217/Distributed-Rate-Limiter/stargazers">
+    <img src="https://img.shields.io/github/stars/anubhav217/Distributed-Rate-Limiter.svg?style=for-the-badge" alt="Stars">
+  </a>
 </p>
 
 An extensible rate-limiting engine for Node.js/Express — supporting fixed-window & token-bucket algorithms, pluggable store backends (in-memory or Redis), and tiered API-key based rate limiting (Free / Pro / Enterprise).
