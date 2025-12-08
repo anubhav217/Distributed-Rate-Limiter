@@ -1,3 +1,6 @@
+// src/config/env.ts
+import 'dotenv/config';
+
 export type StoreBackend = 'memory' | 'redis';
 
 export interface AppConfig {
@@ -19,6 +22,5 @@ const parsePort = (value: string | undefined, fallback: number): number => {
 export const config: AppConfig = {
   port: parsePort(process.env.PORT, 3000),
   storeBackend: (getEnv('STORE_BACKEND', 'memory') as StoreBackend) || 'memory',
-  // This will become relevant once RedisStore is implemented
   redisUrl: getEnv('REDIS_URL', 'redis://localhost:6379')!,
 };
