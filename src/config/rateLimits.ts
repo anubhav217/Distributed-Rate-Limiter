@@ -1,37 +1,43 @@
 import { Algorithm, RateLimitRule } from '../lib/types';
 import { Request } from 'express';
+import {
+  PlanId,
+  resolvePlanFromApiKey,
+  ROUTE_PLAN_RULES,
+  DEFAULT_ROUTE_RULE,
+} from './apiPlans';
 
 export interface ResolvedRule {
   rule: RateLimitRule;
   algorithm: Algorithm;
+  plan: PlanId;
 }
 
 /**
- * Resolve a rate limit rule based on route, method, user plan etc.
- * For now: simple examples.
+ * Resolve a rate limit rule based on:
+ * - route (path prefix)
+ * - client plan (free / pro / enterprise)
+ * - API key (from x-api-key header)
  */
 export function resolveRateLimitRule(
   req: Request,
-  _clientKey: string
+  clientKey: string
 ): ResolvedRule {
-  if (req.path.startsWith('/login')) {
-    return {
-      algorithm: 'fixed-window',
-      rule: {
-        maxRequests: 5,
-        windowMs: 60_000,
-      },
-    };
-  }
+  // 1) Determine plan from key
+  const plan = resolvePlanFromApiKey(clientKey);
 
-  // default: 100 req/min token bucket
+  // 2) Find route group by prefix, e.g. /login, /api
+  const routeConfig =
+    ROUTE_PLAN_RULES.find((cfg) => req.path.startsWith(cfg.routePrefix)) ??
+    DEFAULT_ROUTE_RULE;
+
+  // 3) Pick the rule for this plan (fallback to "free" if somehow missing)
+  const ruleForPlan: RateLimitRule =
+    routeConfig.rules[plan] ?? routeConfig.rules.free;
+
   return {
-    algorithm: 'token-bucket',
-    rule: {
-      maxRequests: 100,
-      windowMs: 60_000,
-      bucketCapacity: 100,
-      // refillRatePerSec will be derived if omitted
-    },
+    algorithm: routeConfig.algorithm,
+    rule: ruleForPlan,
+    plan,
   };
 }

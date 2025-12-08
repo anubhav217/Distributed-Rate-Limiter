@@ -9,12 +9,9 @@ export function createRateLimiterMiddleware(rateLimiter: RateLimiter) {
     next: NextFunction
   ) {
     try {
-      const clientKey =
-        req.header('x-api-key') ||
-        req.ip ||
-        'unknown';
+      const clientKey = req.header('x-api-key') || req.ip || 'unknown';
 
-      const { rule, algorithm } = resolveRateLimitRule(req, clientKey);
+      const { rule, algorithm, plan } = resolveRateLimitRule(req, clientKey);
 
       const result = await rateLimiter.checkAndConsume(
         clientKey,
@@ -25,6 +22,7 @@ export function createRateLimiterMiddleware(rateLimiter: RateLimiter) {
       res.setHeader('X-RateLimit-Limit', rule.maxRequests.toString());
       res.setHeader('X-RateLimit-Remaining', result.remaining.toString());
       res.setHeader('X-RateLimit-Reset', result.resetAt.toString());
+      res.setHeader('X-RateLimit-Plan', plan);
 
       if (!result.allowed) {
         return res.status(429).json({
