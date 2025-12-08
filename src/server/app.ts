@@ -1,5 +1,4 @@
 // src/server/app.ts
-
 import express from 'express';
 import Redis from 'ioredis';
 
@@ -10,7 +9,7 @@ import { createRateLimiterMiddleware } from '../middleware/rateLimiterMiddleware
 import type { RateLimitStore } from '../lib/store';
 import { config } from '../config/env';
 
-const app = express();
+export const app = express();
 const port = config.port;
 
 let store: RateLimitStore;
@@ -21,22 +20,17 @@ switch (config.storeBackend) {
     store = new MemoryStore();
     break;
   }
-
   case 'redis': {
     console.log(
       `[config] Using RedisStore backend (REDIS_URL=${config.redisUrl})`,
     );
-
     const redis = new Redis(config.redisUrl);
-
     redis.on('error', (err) => {
       console.error('[redis] connection error:', err);
     });
-
     store = new RedisStore(redis);
     break;
   }
-
   default: {
     console.warn(
       `[config] Unknown STORE_BACKEND="${config.storeBackend}", falling back to MemoryStore.`,
@@ -67,6 +61,9 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.listen(port, () => {
-  console.log(`Rate-limited API listening on http://localhost:${port}`);
-});
+// Only listen when run directly (not when imported in tests)
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Rate-limited API listening on http://localhost:${port}`);
+  });
+}
